@@ -26,9 +26,15 @@ resource "aws_vpc" "vpn_vpc" {
 resource "aws_subnet" "vpn_subnet" {
   vpc_id     = aws_vpc.vpn_vpc.id
   cidr_block = "10.0.1.0/24"
-
   tags = {
-    Name = "Main"
+    Name = "VPNSubnet"
+  }
+}
+
+resource "aws_internet_gateway" "vpn_gw" {
+  vpc_id = aws_vpc.vpn_vpc.id
+  tags = {
+    Name = "VPNInternetGateway"
   }
 }
 
@@ -36,7 +42,9 @@ resource "aws_instance" "vpn_server" {
   ami           = "ami-01f87c43e618bf8f0"
   instance_type = "t2.micro"
   associate_public_ip_address = true
-
+  depends_on = [
+    aws_internet_gateway.vpn_gw
+  ]
   tags = {
     Name = "VPNServer"
   }
